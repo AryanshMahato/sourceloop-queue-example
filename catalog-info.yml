@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: queue-example
+  description: usage example for arc&#39;s queue extension
+  annotations:
+    github.com/project-slug: AryanshMahato/queue-example
+    backstage.io/techdocs-ref: dir:../
+spec:
+  type: website
+  lifecycle: experimental
+  owner: AryanshMahato

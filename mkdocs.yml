@@ -1,0 +1,8 @@
+site_name: queue-example
+site_description: usage example for arc&#39;s queue extension
+
+nav:
+  - Introduction: README.md
+
+plugins:
+  - techdocs-core

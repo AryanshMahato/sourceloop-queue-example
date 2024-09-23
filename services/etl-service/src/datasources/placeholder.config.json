@@ -1,0 +1,17 @@
+{
+  "$schema": "https://aryanshmahato.github.io/lb4-connector-schema/schema.json",
+  "baseURL": "",
+  "name": "placeholder",
+  "connector": "rest",
+  "operations": [
+    {
+      "template": {
+        "method": "GET",
+        "url": "/users"
+      },
+      "functions": {
+        "getUsers": []
+      }
+    }
+  ]
+}

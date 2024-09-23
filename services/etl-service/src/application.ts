@@ -26,6 +26,8 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import * as openapi from './openapi.json';
+import {PlaceholderProvider} from './services';
+import {RemoteServiceBindings} from './bindings';
 
 export {ApplicationConfig};
 
@@ -80,6 +82,7 @@ export class EtlServiceApplication extends BootMixin(
     // Add bearer verifier component
     this.bind(BearerVerifierBindings.Config).to({
       type: BearerVerifierType.service,
+      useSymmetricEncryption: true,
     } as BearerVerifierConfig);
     this.component(BearerVerifierComponent);
     // Add authorization component
@@ -87,6 +90,9 @@ export class EtlServiceApplication extends BootMixin(
       allowAlwaysPaths: ['/explorer', '/openapi.json'],
     });
     this.component(AuthorizationComponent);
+    this.bind(RemoteServiceBindings.Placeholder).toProvider(
+      PlaceholderProvider,
+    );
 
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));

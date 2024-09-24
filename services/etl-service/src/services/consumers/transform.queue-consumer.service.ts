@@ -1,21 +1,30 @@
 import {AnyObject} from '@loopback/repository';
 import {asConsumer, EventsInStream, IConsumer} from '@sourceloop/queue';
-import {injectable} from '@loopback/core';
+import {injectable, service} from '@loopback/core';
 import {
-  eventTransform,
+  QueueEvent,
   SqsTransformStream,
   topicTransform,
 } from '../../types/event-types';
+import {TransformService} from '../transform.service';
 
 @injectable(asConsumer)
 export class TransformQueueConsumerService
   implements IConsumer<SqsTransformStream, EventsInStream<SqsTransformStream>>
 {
+  constructor(
+    @service(TransformService)
+    private transformService: TransformService,
+  ) {}
   topic: string = topicTransform;
 
-  event: EventsInStream<SqsTransformStream> = eventTransform;
+  event: EventsInStream<SqsTransformStream> = QueueEvent.Transform;
 
   async handler(payload: AnyObject) {
-    console.log('payload', payload);
+    console.log('Transform payload', payload);
+    if (!payload.users || !Array.isArray(payload.users)) {
+      throw new Error('Users are required for transformation');
+    }
+    await this.transformService.transform(payload.users);
   }
 }

@@ -1,5 +1,5 @@
 import {injectable, /* inject, */ BindingScope, service} from '@loopback/core';
-import {User} from '../types';
+import {User} from '../types/user';
 import {LoadService} from './load.service';
 import {inject} from '@loopback/context';
 import {ILogger, LOGGER} from '@sourceloop/core';

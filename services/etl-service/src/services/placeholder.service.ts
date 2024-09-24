@@ -1,7 +1,7 @@
 import {inject, Provider} from '@loopback/core';
 import {getService} from '@loopback/service-proxy';
 import {PlaceholderDataSource} from '../datasources';
-import {User} from '../types';
+import {User} from '../types/user';
 
 export interface PlaceholderService {
   getUsers(): Promise<User[]>;

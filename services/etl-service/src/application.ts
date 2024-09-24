@@ -12,22 +12,28 @@ import {
   AuthorizationComponent,
 } from 'loopback4-authorization';
 import {
-  CoreComponent,
-  ServiceSequence,
-  SFCoreBindings,
   BearerVerifierBindings,
   BearerVerifierComponent,
   BearerVerifierConfig,
   BearerVerifierType,
+  CoreComponent,
   SECURITY_SCHEME_SPEC,
+  ServiceSequence,
+  SFCoreBindings,
 } from '@sourceloop/core';
 import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import * as openapi from './openapi.json';
-import {PlaceholderProvider} from './services';
+import {PlaceholderProvider, TransformQueueConsumerService} from './services';
 import {RemoteServiceBindings} from './bindings';
+import {
+  asConsumer,
+  MessageBusQueueConnectorsComponent,
+  SqsClientBindings,
+} from '@sourceloop/queue';
+import {topicTransform} from './types/event-types';
 
 export {ApplicationConfig};
 
@@ -35,6 +41,8 @@ export class EtlServiceApplication extends BootMixin(
   ServiceMixin(RepositoryMixin(RestApplication)),
 ) {
   constructor(options: ApplicationConfig = {}) {
+    const maxNumberOfMessages = +(process.env.MAX_NUMBER_OF_MESSAGES ?? 10);
+    const waitTimeSeconds = +(process.env.WAIT_TIME_SECONDS ?? 20);
     const port = 3000;
     dotenv.config();
     dotenvExt.load({
@@ -93,6 +101,38 @@ export class EtlServiceApplication extends BootMixin(
     this.bind(RemoteServiceBindings.Placeholder).toProvider(
       PlaceholderProvider,
     );
+
+    if (process.env.ENABLE_SQS === 'true') {
+      // this.bind(QueueBindings.Config).to({
+      //   provider: 'sqs|redis',
+      // })
+      this.bind(SqsClientBindings.SqsClient).to(
+        options.sqsConfig ?? {
+          initObservers: true,
+          clientConfig: {
+            region: process.env.AWS_REGION,
+            credentials: {
+              accessKeyId: process.env.AWS_SECRET_ACCESS_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            },
+            maxAttempts: 3,
+            retryMode: 'standard',
+          },
+
+          queueUrl: process.env.SQS_QUEUE_URL,
+          groupId: process.env.SQS_GROUP_ID ?? 'etl-group',
+          maxNumberOfMessages: maxNumberOfMessages,
+          waitTimeSeconds: waitTimeSeconds,
+          topics: [topicTransform],
+        },
+      );
+
+      this.bind('services.TransformQueueConsumerService')
+        .toClass(TransformQueueConsumerService)
+        .apply(asConsumer);
+
+      this.component(MessageBusQueueConnectorsComponent);
+    }
 
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));

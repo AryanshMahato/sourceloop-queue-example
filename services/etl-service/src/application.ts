@@ -26,10 +26,9 @@ import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import * as openapi from './openapi.json';
-import {PlaceholderProvider, TransformQueueConsumerService} from './services';
+import {PlaceholderProvider} from './services';
 import {RemoteServiceBindings} from './bindings';
 import {
-  asConsumer,
   MessageBusQueueConnectorsComponent,
   SqsClientBindings,
 } from '@sourceloop/queue';
@@ -126,10 +125,6 @@ export class EtlServiceApplication extends BootMixin(
           topics: [topicTransform],
         },
       );
-
-      this.bind('services.TransformQueueConsumerService')
-        .toClass(TransformQueueConsumerService)
-        .apply(asConsumer);
 
       this.component(MessageBusQueueConnectorsComponent);
     }

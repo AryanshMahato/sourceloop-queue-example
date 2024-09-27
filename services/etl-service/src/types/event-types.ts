@@ -6,6 +6,10 @@ export enum QueueEvent {
   Load = 'Load',
 }
 
+export enum QueueGroup {
+  All = 'all',
+}
+
 export const topicTransform = 'Transform';
 
 export interface SqsTransformStream extends IStreamDefinitionSQS {

@@ -4,11 +4,7 @@ import {RemoteServiceBindings} from '../bindings';
 import {PlaceholderService} from './placeholder.service';
 import {ILogger, LOGGER} from '@sourceloop/core';
 import {TransformService} from './transform.service';
-import {
-  QueueEvent,
-  SqsTransformStream,
-  topicTransform,
-} from '../types/event-types';
+import {QueueEvent, SqsTransformStream} from '../types/event-types';
 import {Producer, producer} from '@sourceloop/queue';
 
 @injectable({scope: BindingScope.TRANSIENT})
@@ -19,7 +15,7 @@ export class ExtractionService {
     @inject(LOGGER.LOGGER_INJECT) private readonly logger: ILogger,
     @service(TransformService)
     private readonly transformService: TransformService,
-    @producer(topicTransform)
+    @producer()
     private readonly sqsProducer?: Producer<SqsTransformStream>,
   ) {}
 

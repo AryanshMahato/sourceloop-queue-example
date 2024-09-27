@@ -3,11 +3,7 @@ import {User} from '../types/user';
 import {LoadService} from './load.service';
 import {inject} from '@loopback/context';
 import {ILogger, LOGGER} from '@sourceloop/core';
-import {
-  QueueEvent,
-  SqsTransformStream,
-  topicTransform,
-} from '../types/event-types';
+import {QueueEvent, SqsTransformStream} from '../types/event-types';
 import {Producer, producer} from '@sourceloop/queue';
 
 @injectable({scope: BindingScope.TRANSIENT})
@@ -15,7 +11,7 @@ export class TransformService {
   constructor(
     @service(LoadService) private readonly loadService: LoadService,
     @inject(LOGGER.LOGGER_INJECT) private readonly logger: ILogger,
-    @producer(topicTransform)
+    @producer()
     private readonly sqsProducer?: Producer<SqsTransformStream>,
   ) {}
 

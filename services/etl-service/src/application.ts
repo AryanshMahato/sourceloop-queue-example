@@ -31,8 +31,9 @@ import {RemoteServiceBindings} from './bindings';
 import {
   MessageBusQueueConnectorsComponent,
   SqsClientBindings,
+  SqsConfig,
 } from '@sourceloop/queue';
-import {topicTransform} from './types/event-types';
+import {QueueGroup} from './types/event-types';
 
 export {ApplicationConfig};
 
@@ -102,28 +103,26 @@ export class EtlServiceApplication extends BootMixin(
     );
 
     if (process.env.ENABLE_SQS === 'true') {
-      // this.bind(QueueBindings.Config).to({
-      //   provider: 'sqs|redis',
-      // })
       this.bind(SqsClientBindings.SqsClient).to(
-        options.sqsConfig ?? {
-          initObservers: true,
-          clientConfig: {
-            region: process.env.AWS_REGION,
-            credentials: {
-              accessKeyId: process.env.AWS_SECRET_ACCESS_ID,
-              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            },
-            maxAttempts: 3,
-            retryMode: 'standard',
-          },
-
-          queueUrl: process.env.SQS_QUEUE_URL,
-          groupId: process.env.SQS_GROUP_ID ?? 'etl-group',
-          maxNumberOfMessages: maxNumberOfMessages,
-          waitTimeSeconds: waitTimeSeconds,
-          topics: [topicTransform],
-        },
+        options.sqsConfig ??
+          ({
+            initObservers: true, // should initialize the observers(for consumers)
+            clientConfig: {
+              region: process.env.AWS_REGION,
+              credentials: {
+                accessKeyId: process.env.AWS_SECRET_ACCESS_ID,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+              },
+              maxAttempts: 3,
+              retryMode: 'standard',
+            }, // check where we can pass it
+            queueUrl: process.env.SQS_QUEUE_URL,
+            groupId: process.env.SQS_GROUP_ID ?? 'etl-group', // use this for consumer instead of topic
+            maxNumberOfMessages: maxNumberOfMessages,
+            waitTimeSeconds: waitTimeSeconds,
+            groupIds: Object.values(QueueGroup),
+            queueType: 'standard',
+          } as SqsConfig),
       );
 
       this.component(MessageBusQueueConnectorsComponent);
